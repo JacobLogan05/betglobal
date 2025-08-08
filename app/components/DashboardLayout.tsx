@@ -1,126 +1,197 @@
 'use client'
 
-import { UserButton } from '@clerk/nextjs'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { UserButton } from '@clerk/nextjs'
 import { 
   HomeIcon, 
   UsersIcon, 
-  CurrencyDollarIcon, 
+  UserPlusIcon, 
+  CurrencyDollarIcon,
   ChartBarIcon,
-  CogIcon,
+  GiftIcon,
   DocumentTextIcon,
-  TrophyIcon,
-  UserGroupIcon
+  Cog6ToothIcon,
+  Bars3Icon,
+  XMarkIcon,
+  BoltIcon,
+  SparklesIcon
 } from '@heroicons/react/24/outline'
 
 interface DashboardLayoutProps {
   children: React.ReactNode
-  currentUser: any
+  currentUser?: any
 }
 
-const navigation = [
-  { name: 'Dashboard', href: '/admin', icon: HomeIcon },
-  { name: 'Sales Reps', href: '/admin/reps', icon: UsersIcon },
-  { name: 'Signups', href: '/admin/signups', icon: UserGroupIcon },
-  { name: 'Commissions', href: '/admin/commissions', icon: CurrencyDollarIcon },
-  { name: 'Analytics', href: '/admin/analytics', icon: ChartBarIcon },
-  { name: 'Bonuses', href: '/admin/bonuses', icon: TrophyIcon },
-  { name: 'Reports', href: '/admin/reports', icon: DocumentTextIcon },
-  { name: 'Settings', href: '/admin/settings', icon: CogIcon },
-]
-
 export default function DashboardLayout({ children, currentUser }: DashboardLayoutProps) {
+  const [sidebarOpen, setSidebarOpen] = useState(false)
   const pathname = usePathname()
 
+  const navigation = [
+    { name: 'Dashboard', href: '/admin', icon: HomeIcon, gradient: 'from-blue-400 to-cyan-400' },
+    { name: 'Sales Reps', href: '/admin/reps', icon: UsersIcon, gradient: 'from-purple-400 to-pink-400' },
+    { name: 'Signups', href: '/admin/signups', icon: UserPlusIcon, gradient: 'from-green-400 to-emerald-400' },
+    { name: 'Commissions', href: '/admin/commissions', icon: CurrencyDollarIcon, gradient: 'from-yellow-400 to-orange-400' },
+    { name: 'Analytics', href: '/admin/analytics', icon: ChartBarIcon, gradient: 'from-indigo-400 to-purple-400' },
+    { name: 'Bonuses', href: '/admin/bonuses', icon: GiftIcon, gradient: 'from-pink-400 to-rose-400' },
+    { name: 'Reports', href: '/admin/reports', icon: DocumentTextIcon, gradient: 'from-teal-400 to-cyan-400' },
+    { name: 'Settings', href: '/admin/settings', icon: Cog6ToothIcon, gradient: 'from-gray-400 to-slate-400' },
+  ]
+
   return (
-    <div className="min-h-screen relative overflow-hidden bg-black text-white">
-      {/* Cyberpunk Grid Background */}
-      <div className="absolute inset-0 opacity-10">
-        <div className="absolute inset-0 bg-gradient-to-br from-cyan-900/20 via-purple-900/20 to-pink-900/20"></div>
-        <div 
-          className="absolute inset-0" 
-          style={{
-            backgroundImage: `
-              linear-gradient(rgba(0, 255, 255, 0.05) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(0, 255, 255, 0.05) 1px, transparent 1px)
-            `,
-            backgroundSize: '50px 50px'
-          }}
-        ></div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-gray-950 to-black relative overflow-hidden">
+      {/* Animated background elements */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-cyan-500/10 to-teal-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-br from-purple-500/5 to-pink-500/5 rounded-full blur-3xl animate-pulse delay-500"></div>
       </div>
 
-      {/* Glowing Orbs */}
-      <div className="absolute top-20 right-20 w-32 h-32 bg-cyan-500/10 rounded-full blur-xl animate-pulse"></div>
-      <div className="absolute bottom-20 left-20 w-40 h-40 bg-purple-500/10 rounded-full blur-xl animate-pulse delay-1000"></div>
-
-      {/* Header */}
-      <div className="relative z-10 border-b border-cyan-500/20 bg-black/50 backdrop-blur-sm">
-        <div className="px-6 py-4 flex justify-between items-center">
-          <div>
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">
-              BET GLOBAL OS
-            </h1>
-            <div className="text-cyan-300/60 text-xs font-mono">
-              [ NEURAL COMMAND INTERFACE ACTIVE ]
-            </div>
-          </div>
-          <div className="flex items-center space-x-4">
-            <div className="text-right">
-              <div className="text-sm text-cyan-300">
-                {currentUser?.firstName || 'Admin'} {currentUser?.lastName || 'User'}
-              </div>
-              <div className="text-xs text-purple-300/60 font-mono uppercase">
-                {currentUser?.role || 'ADMIN'}
-              </div>
-            </div>
-            <UserButton afterSignOutUrl="/" />
-          </div>
-        </div>
+      {/* Subtle grid pattern */}
+      <div className="fixed inset-0 opacity-[0.02] pointer-events-none">
+        <div className="absolute inset-0" style={{
+          backgroundImage: `
+            linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)
+          `,
+          backgroundSize: '50px 50px'
+        }}></div>
       </div>
 
-      <div className="flex relative z-10">
-        {/* Sidebar Navigation */}
-        <div className="w-64 bg-black/30 backdrop-blur-sm border-r border-cyan-500/20 min-h-screen">
-          <nav className="p-6 space-y-2">
+      {/* Mobile sidebar */}
+      <div className={`fixed inset-0 z-50 lg:hidden transition-all duration-300 ${sidebarOpen ? 'opacity-100 visible' : 'opacity-0 invisible'}`}>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-md" onClick={() => setSidebarOpen(false)} />
+        <div className={`fixed left-0 top-0 h-full w-72 bg-gradient-to-b from-slate-950/98 to-gray-950/98 backdrop-blur-2xl border-r border-white/10 shadow-2xl transform transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+          <div className="flex items-center justify-between p-8 border-b border-white/10">
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 bg-gradient-to-br from-blue-400 to-purple-500 rounded-lg flex items-center justify-center">
+                <BoltIcon className="h-5 w-5 text-white" />
+              </div>
+              <h1 className="text-xl font-bold bg-gradient-to-r from-white via-blue-100 to-purple-200 bg-clip-text text-transparent tracking-tight">
+                BET GLOBAL OS
+              </h1>
+            </div>
+            <button
+              onClick={() => setSidebarOpen(false)}
+              className="text-gray-400 hover:text-white transition-all duration-200 p-2 hover:bg-white/5 rounded-lg"
+            >
+              <XMarkIcon className="h-5 w-5" />
+            </button>
+          </div>
+          <nav className="p-6 space-y-1">
             {navigation.map((item) => {
               const isActive = pathname === item.href
               return (
                 <Link
                   key={item.name}
                   href={item.href}
-                  className={`flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 ${
+                  className={`group flex items-center px-4 py-3.5 rounded-xl transition-all duration-300 relative overflow-hidden ${
                     isActive
-                      ? 'bg-gradient-to-r from-cyan-500/20 to-purple-500/20 text-cyan-300 border border-cyan-500/30'
-                      : 'text-gray-400 hover:text-cyan-300 hover:bg-gray-800/30'
+                      ? 'bg-gradient-to-r from-white/10 to-white/5 border border-white/20 text-white shadow-lg'
+                      : 'text-gray-400 hover:text-white hover:bg-white/5 border border-transparent hover:border-white/10'
                   }`}
+                  onClick={() => setSidebarOpen(false)}
                 >
-                  <item.icon className="mr-3 h-5 w-5" />
-                  {item.name}
                   {isActive && (
-                    <div className="ml-auto w-2 h-2 bg-cyan-400 rounded-full animate-pulse"></div>
+                    <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-xl"></div>
+                  )}
+                  <div className={`relative z-10 w-5 h-5 mr-4 ${isActive ? `bg-gradient-to-r ${item.gradient} bg-clip-text text-transparent` : ''}`}>
+                    <item.icon className="h-5 w-5" />
+                  </div>
+                  <span className="relative z-10 font-medium tracking-wide">{item.name}</span>
+                  {isActive && (
+                    <div className="absolute right-3 w-2 h-2 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full animate-pulse"></div>
                   )}
                 </Link>
               )
             })}
           </nav>
+        </div>
+      </div>
 
-          {/* System Status */}
-          <div className="absolute bottom-6 left-6 right-6">
-            <div className="bg-gradient-to-r from-green-900/20 to-emerald-900/20 border border-green-500/30 rounded-lg p-4 backdrop-blur-sm">
-              <div className="flex items-center space-x-2">
-                <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                <div className="text-xs text-green-300 font-mono">SYSTEM ONLINE</div>
+      {/* Desktop sidebar */}
+      <div className="fixed inset-y-0 left-0 z-40 w-72">
+        <div className="h-full bg-gradient-to-b from-slate-950/95 to-gray-950/95 backdrop-blur-2xl border-r border-white/10 shadow-2xl">
+          <div className="flex items-center p-8 border-b border-white/10">
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 bg-gradient-to-br from-blue-400 to-purple-500 rounded-lg flex items-center justify-center shadow-lg">
+                <BoltIcon className="h-5 w-5 text-white" />
               </div>
-              <div className="text-xs text-green-300/60 mt-1">All systems operational</div>
+              <h1 className="text-xl font-bold bg-gradient-to-r from-white via-blue-100 to-purple-200 bg-clip-text text-transparent tracking-tight">
+                BET GLOBAL OS
+              </h1>
+            </div>
+          </div>
+          <nav className="p-6 space-y-1">
+            {navigation.map((item) => {
+              const isActive = pathname === item.href
+              return (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className={`group flex items-center px-4 py-3.5 rounded-xl transition-all duration-300 relative overflow-hidden ${
+                    isActive
+                      ? 'bg-gradient-to-r from-white/10 to-white/5 border border-white/20 text-white shadow-lg'
+                      : 'text-gray-400 hover:text-white hover:bg-white/5 border border-transparent hover:border-white/10'
+                  }`}
+                >
+                  {isActive && (
+                    <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-xl"></div>
+                  )}
+                  <div className={`relative z-10 w-5 h-5 mr-4 ${isActive ? `bg-gradient-to-r ${item.gradient} bg-clip-text text-transparent` : ''}`}>
+                    <item.icon className="h-5 w-5" />
+                  </div>
+                  <span className="relative z-10 font-medium tracking-wide">{item.name}</span>
+                  {isActive && (
+                    <div className="absolute right-3 w-2 h-2 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full animate-pulse"></div>
+                  )}
+                </Link>
+              )
+            })}
+          </nav>
+        </div>
+      </div>
+
+      {/* Main content */}
+      <div className="pl-72">
+        {/* Top bar */}
+        <div className="sticky top-0 z-30 bg-gradient-to-r from-slate-950/95 to-gray-950/95 backdrop-blur-2xl border-b border-white/10 shadow-lg">
+          <div className="flex items-center justify-between px-8 py-5">
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="hidden text-gray-400 hover:text-white transition-all duration-200 p-2 hover:bg-white/5 rounded-lg"
+            >
+              <Bars3Icon className="h-6 w-6" />
+            </button>
+            
+            <div className="flex items-center space-x-6">
+              <div className="text-right hidden sm:block">
+                <div className="text-sm text-gray-400 font-medium">Welcome back,</div>
+                <div className="text-white font-semibold tracking-wide bg-gradient-to-r from-white to-gray-200 bg-clip-text text-transparent">
+                  {currentUser?.firstName} {currentUser?.lastName}
+                </div>
+              </div>
+              <div className="relative">
+                <UserButton 
+                  appearance={{
+                    elements: {
+                      avatarBox: "w-11 h-11 border-2 border-white/20 hover:border-white/40 transition-all duration-300 shadow-lg hover:shadow-xl"
+                    }
+                  }}
+                />
+                <div className="absolute -top-1 -right-1 w-4 h-4 bg-gradient-to-r from-green-400 to-emerald-400 rounded-full border-2 border-slate-950 animate-pulse"></div>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Main Content */}
-        <div className="flex-1 p-8">
-          {children}
-        </div>
+        {/* Page content */}
+        <main className="p-8 relative z-10">
+          <div className="max-w-7xl mx-auto">
+            {children}
+          </div>
+        </main>
       </div>
     </div>
   )
