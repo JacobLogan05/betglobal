@@ -1,11 +1,21 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 
 const isProtectedRoute = createRouteMatcher([
-  '/dashboard(.*)',
-  '/api(.*)',
+  '/admin(.*)',
+  '/api/admin(.*)', // Only protect admin API routes, not all API routes
 ]);
 
 export default clerkMiddleware((auth, req) => {
+  // Allow sign-in and sign-up routes to be public
+  if (req.nextUrl.pathname.startsWith('/sign-in') || req.nextUrl.pathname.startsWith('/sign-up')) {
+    return;
+  }
+  
+  // Allow Clerk's internal API routes to be public
+  if (req.nextUrl.pathname.includes('clerk') || req.nextUrl.pathname.includes('SignIn_clerk_catchall_check')) {
+    return;
+  }
+  
   if (isProtectedRoute(req)) {
     auth().protect();
   }
