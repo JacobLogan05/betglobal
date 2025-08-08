@@ -82,6 +82,37 @@
   }
 }
 
+/* Hide Next.js development overlay warnings */
+.__next-dev-overlay-left {
+  display: none !important;
+}
+
+.__next-dev-overlay-right {
+  display: none !important;
+}
+
+/* Hide React DevTools warnings */
+[data-react-devtools-portal-root] {
+  display: none !important;
+}
+
+/* Hide all development overlays and error boundaries */
+[data-nextjs-dialog-overlay] {
+  display: none !important;
+}
+
+[data-nextjs-toast] {
+  display: none !important;
+}
+
+.__next-dev-overlay {
+  display: none !important;
+}
+
+.react-dev-overlay {
+  display: none !important;
+}
+
 /* Futuristic Animations */
 @keyframes gradient-x {
   0% {
@@ -163,4 +194,23 @@
     --tw-blur: blur(64px);
     filter: var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow);
   }
+}
+
+/* Cyberpunk Animations */
+@keyframes scan {
+  0% {
+    top: -2px;
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+  100% {
+    top: 100vh;
+    opacity: 0;
+  }
+}
+
+.animate-scan {
+  animation: scan 3s linear infinite;
 }

@@ -1,12 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  experimental: {
-    serverActions: {
-      allowedOrigins: ['localhost:3000']
+  logging: {
+    fetches: {
+      fullUrl: false
     }
-  },
-  images: {
-    domains: ['img.clerk.com']
   }
 }
 

@@ -1,73 +1,69 @@
-import { auth } from '@clerk/nextjs/server'
-import { redirect } from 'next/navigation'
-import { SignInButton, SignUpButton } from '@clerk/nextjs'
+import { SignInButton, SignUpButton, SignedIn, SignedOut, UserButton } from '@clerk/nextjs'
 
-export default async function HomePage() {
-  // Only check auth if Clerk is properly configured
-  if (process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY && 
-      process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY !== 'your_clerk_publishable_key_here') {
-    const { userId } = await auth()
-    if (userId) {
-      redirect('/dashboard')
-    }
-  }
-
+export default function Home() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-bovada-dark via-chalkboard-dark to-black">
-      <div className="container mx-auto px-4 py-16">
-        <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-6xl font-bold text-white mb-6">
-            Bet Global
-            <span className="block text-bovada-gold">Operating System</span>
-          </h1>
-          
-          <p className="text-xl text-gray-300 mb-12 max-w-2xl mx-auto">
-            Advanced commission tracking and management system for sports betting affiliates. 
-            Track signups, monitor commissions, and optimize your betting operations.
-          </p>
+    <div className="min-h-screen relative overflow-hidden bg-black text-white flex items-center justify-center">
+      {/* Cyberpunk Grid Background */}
+      <div className="absolute inset-0 opacity-20">
+        <div className="absolute inset-0 bg-gradient-to-br from-cyan-900/30 via-purple-900/30 to-pink-900/30"></div>
+        <div 
+          className="absolute inset-0" 
+          style={{
+            backgroundImage: `
+              linear-gradient(rgba(0, 255, 255, 0.1) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(0, 255, 255, 0.1) 1px, transparent 1px)
+            `,
+            backgroundSize: '50px 50px'
+          }}
+        ></div>
+      </div>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            {process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY && 
-             process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY !== 'your_clerk_publishable_key_here' ? (
-              <>
-                <SignInButton mode="modal">
-                  <button className="bg-bovada-gold hover:bg-bovada-gold/90 text-black font-semibold px-8 py-3 rounded-lg transition-colors">
-                    Sign In
-                  </button>
-                </SignInButton>
-                
-                <SignUpButton mode="modal">
-                  <button className="border border-bovada-gold text-bovada-gold hover:bg-bovada-gold hover:text-black font-semibold px-8 py-3 rounded-lg transition-colors">
-                    Get Started
-                  </button>
-                </SignUpButton>
-              </>
-            ) : (
-              <div className="bg-yellow-500/20 border border-yellow-500 rounded-lg p-4 max-w-md">
-                <p className="text-yellow-300 text-sm">
-                  <strong>Setup Required:</strong> Please configure your Clerk authentication keys in .env.local to enable sign-in functionality.
-                </p>
-              </div>
-            )}
-          </div>
+      {/* Glowing Orbs */}
+      <div className="absolute top-20 left-20 w-32 h-32 bg-cyan-500/20 rounded-full blur-xl animate-pulse"></div>
+      <div className="absolute bottom-20 right-20 w-40 h-40 bg-purple-500/20 rounded-full blur-xl animate-pulse delay-1000"></div>
+      <div className="absolute top-1/2 left-10 w-24 h-24 bg-pink-500/20 rounded-full blur-xl animate-pulse delay-500"></div>
 
-          <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-white/5 backdrop-blur-sm rounded-lg p-6">
-              <h3 className="text-xl font-semibold text-white mb-3">Commission Tracking</h3>
-              <p className="text-gray-400">Real-time tracking of your affiliate commissions across multiple platforms</p>
-            </div>
-            
-            <div className="bg-white/5 backdrop-blur-sm rounded-lg p-6">
-              <h3 className="text-xl font-semibold text-white mb-3">Lead Management</h3>
-              <p className="text-gray-400">Comprehensive signup tracking and lead qualification system</p>
-            </div>
-            
-            <div className="bg-white/5 backdrop-blur-sm rounded-lg p-6">
-              <h3 className="text-xl font-semibold text-white mb-3">Analytics Dashboard</h3>
-              <p className="text-gray-400">Advanced analytics and reporting for data-driven decisions</p>
-            </div>
-          </div>
+      {/* Scanning Lines */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute w-full h-px bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent animate-scan"></div>
+      </div>
+
+      <div className="relative z-10 text-center">
+        <h1 className="text-6xl font-bold mb-8 bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 bg-clip-text text-transparent drop-shadow-2xl">
+          BET GLOBAL OS
+        </h1>
+        <div className="text-cyan-300/60 text-sm mb-8 font-mono tracking-wider">
+          [ NEURAL INTERFACE INITIALIZED ]
         </div>
+        
+        <SignedOut>
+          <div className="space-x-4">
+            <SignInButton mode="modal">
+              <button className="relative bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold py-3 px-6 rounded-lg border border-cyan-400/30 shadow-lg shadow-cyan-500/25 transition-all duration-300 hover:shadow-cyan-500/50 hover:scale-105">
+                <span className="relative z-10">SIGN IN</span>
+                <div className="absolute inset-0 bg-gradient-to-r from-cyan-400/20 to-blue-400/20 rounded-lg blur opacity-0 hover:opacity-100 transition-opacity duration-300"></div>
+              </button>
+            </SignInButton>
+            <SignUpButton mode="modal">
+              <button className="relative bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-bold py-3 px-6 rounded-lg border border-purple-400/30 shadow-lg shadow-purple-500/25 transition-all duration-300 hover:shadow-purple-500/50 hover:scale-105">
+                <span className="relative z-10">SIGN UP</span>
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-400/20 to-pink-400/20 rounded-lg blur opacity-0 hover:opacity-100 transition-opacity duration-300"></div>
+              </button>
+            </SignUpButton>
+          </div>
+        </SignedOut>
+        
+        <SignedIn>
+          <div className="space-y-4">
+            <p className="text-xl text-cyan-300">
+              <span className="text-cyan-400 font-mono">&gt;</span> SYSTEM ACCESS GRANTED
+            </p>
+            <div className="text-purple-300/60 text-sm font-mono">
+              [ USER AUTHENTICATED ]
+            </div>
+            <UserButton afterSignOutUrl="/" />
+          </div>
+        </SignedIn>
       </div>
     </div>
   )
