@@ -2,7 +2,7 @@ import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 
 const isProtectedRoute = createRouteMatcher([
   '/admin(.*)',
-  '/api/admin(.*)', // Only protect admin API routes, not all API routes
+  '/api/admin/create-rep(.*)', // Only protect specific admin API routes that need auth
 ]);
 
 export default clerkMiddleware((auth, req) => {

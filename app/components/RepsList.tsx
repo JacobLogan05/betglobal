@@ -134,7 +134,7 @@ export default function RepsList({ reps }: RepsListProps) {
           </div>
         ) : (
           <div className="text-center py-12">
-            <div className="text-cyan-300/40 text-6xl mb-4">👥</div>
+            <div className="text-cyan-300/40 text-6xl mb-4 font-black">TEAM</div>
             <p className="text-cyan-300/60 font-mono">[ NO AGENTS FOUND ]</p>
             <p className="text-cyan-300/40 text-sm mt-2">
               {filter === 'all' 

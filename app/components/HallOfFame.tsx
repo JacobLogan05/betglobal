@@ -44,7 +44,7 @@ export default function HallOfFame({ rep }: HallOfFameProps) {
                 <TrophyIcon className="h-10 w-10 text-yellow-900" />
               </div>
               <div className="absolute -top-2 -right-2 w-6 h-6 bg-yellow-400 rounded-full flex items-center justify-center">
-                <span className="text-yellow-900 text-xs font-bold">👑</span>
+                <span className="text-yellow-900 text-xs font-bold">CROWN</span>
               </div>
             </div>
           </div>

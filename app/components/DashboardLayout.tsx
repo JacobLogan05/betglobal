@@ -29,23 +29,23 @@ export default function DashboardLayout({ children, currentUser }: DashboardLayo
   const pathname = usePathname()
 
   const navigation = [
-    { name: 'Dashboard', href: '/admin', icon: HomeIcon, gradient: 'from-blue-400 to-cyan-400' },
-    { name: 'Sales Reps', href: '/admin/reps', icon: UsersIcon, gradient: 'from-purple-400 to-pink-400' },
-    { name: 'Signups', href: '/admin/signups', icon: UserPlusIcon, gradient: 'from-green-400 to-emerald-400' },
+    { name: 'Dashboard', href: '/admin', icon: HomeIcon, gradient: 'from-yellow-400 to-orange-400' },
+    { name: 'Sales Reps', href: '/admin/reps', icon: UsersIcon, gradient: 'from-orange-400 to-red-400' },
+    { name: 'Signups', href: '/admin/signups', icon: UserPlusIcon, gradient: 'from-red-400 to-pink-400' },
     { name: 'Commissions', href: '/admin/commissions', icon: CurrencyDollarIcon, gradient: 'from-yellow-400 to-orange-400' },
-    { name: 'Analytics', href: '/admin/analytics', icon: ChartBarIcon, gradient: 'from-indigo-400 to-purple-400' },
-    { name: 'Bonuses', href: '/admin/bonuses', icon: GiftIcon, gradient: 'from-pink-400 to-rose-400' },
-    { name: 'Reports', href: '/admin/reports', icon: DocumentTextIcon, gradient: 'from-teal-400 to-cyan-400' },
-    { name: 'Settings', href: '/admin/settings', icon: Cog6ToothIcon, gradient: 'from-gray-400 to-slate-400' },
+    { name: 'Analytics', href: '/admin/analytics', icon: ChartBarIcon, gradient: 'from-orange-400 to-red-400' },
+    { name: 'Bonuses', href: '/admin/bonuses', icon: GiftIcon, gradient: 'from-red-400 to-pink-400' },
+    { name: 'Reports', href: '/admin/reports', icon: DocumentTextIcon, gradient: 'from-yellow-400 to-orange-400' },
+    { name: 'Settings', href: '/admin/settings', icon: Cog6ToothIcon, gradient: 'from-orange-400 to-red-400' },
   ]
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-gray-950 to-black relative overflow-hidden">
       {/* Animated background elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-cyan-500/10 to-teal-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-br from-purple-500/5 to-pink-500/5 rounded-full blur-3xl animate-pulse delay-500"></div>
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-yellow-500/10 to-orange-500/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-red-500/10 to-pink-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-br from-orange-500/5 to-red-500/5 rounded-full blur-3xl animate-pulse delay-500"></div>
       </div>
 
       {/* Subtle grid pattern */}
@@ -65,10 +65,10 @@ export default function DashboardLayout({ children, currentUser }: DashboardLayo
         <div className={`fixed left-0 top-0 h-full w-72 bg-gradient-to-b from-slate-950/98 to-gray-950/98 backdrop-blur-2xl border-r border-white/10 shadow-2xl transform transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
           <div className="flex items-center justify-between p-8 border-b border-white/10">
             <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-gradient-to-br from-blue-400 to-purple-500 rounded-lg flex items-center justify-center">
+              <div className="w-8 h-8 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-lg flex items-center justify-center shadow-lg">
                 <BoltIcon className="h-5 w-5 text-white" />
               </div>
-              <h1 className="text-xl font-bold bg-gradient-to-r from-white via-blue-100 to-purple-200 bg-clip-text text-transparent tracking-tight">
+              <h1 className="text-xl font-black bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 bg-clip-text text-transparent tracking-tight">
                 BET GLOBAL OS
               </h1>
             </div>
@@ -94,14 +94,14 @@ export default function DashboardLayout({ children, currentUser }: DashboardLayo
                   onClick={() => setSidebarOpen(false)}
                 >
                   {isActive && (
-                    <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-xl"></div>
+                    <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/10 to-orange-500/10 rounded-xl"></div>
                   )}
                   <div className={`relative z-10 w-5 h-5 mr-4 ${isActive ? `bg-gradient-to-r ${item.gradient} bg-clip-text text-transparent` : ''}`}>
                     <item.icon className="h-5 w-5" />
                   </div>
                   <span className="relative z-10 font-medium tracking-wide">{item.name}</span>
                   {isActive && (
-                    <div className="absolute right-3 w-2 h-2 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full animate-pulse"></div>
+                    <div className="absolute right-3 w-2 h-2 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full animate-pulse"></div>
                   )}
                 </Link>
               )
@@ -115,10 +115,10 @@ export default function DashboardLayout({ children, currentUser }: DashboardLayo
         <div className="h-full bg-gradient-to-b from-slate-950/95 to-gray-950/95 backdrop-blur-2xl border-r border-white/10 shadow-2xl">
           <div className="flex items-center p-8 border-b border-white/10">
             <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-gradient-to-br from-blue-400 to-purple-500 rounded-lg flex items-center justify-center shadow-lg">
+              <div className="w-8 h-8 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-lg flex items-center justify-center shadow-lg">
                 <BoltIcon className="h-5 w-5 text-white" />
               </div>
-              <h1 className="text-xl font-bold bg-gradient-to-r from-white via-blue-100 to-purple-200 bg-clip-text text-transparent tracking-tight">
+              <h1 className="text-xl font-black bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 bg-clip-text text-transparent tracking-tight">
                 BET GLOBAL OS
               </h1>
             </div>
@@ -137,14 +137,14 @@ export default function DashboardLayout({ children, currentUser }: DashboardLayo
                   }`}
                 >
                   {isActive && (
-                    <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-xl"></div>
+                    <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/10 to-orange-500/10 rounded-xl"></div>
                   )}
                   <div className={`relative z-10 w-5 h-5 mr-4 ${isActive ? `bg-gradient-to-r ${item.gradient} bg-clip-text text-transparent` : ''}`}>
                     <item.icon className="h-5 w-5" />
                   </div>
                   <span className="relative z-10 font-medium tracking-wide">{item.name}</span>
                   {isActive && (
-                    <div className="absolute right-3 w-2 h-2 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full animate-pulse"></div>
+                    <div className="absolute right-3 w-2 h-2 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full animate-pulse"></div>
                   )}
                 </Link>
               )

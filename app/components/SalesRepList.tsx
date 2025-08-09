@@ -2,55 +2,66 @@
 
 import { useState } from 'react'
 import { EyeIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/outline'
+import { useSalesRep } from '../contexts/SalesRepContext'
 
-interface SalesRep {
-  id: string
-  firstName: string
-  lastName: string
-  role: string
-  totalSignups: number
-  bovadaSignups: number
-  chalkboardSignups: number
-  commissionsEarned: number
-  commissionsPaid: number
-  commissionsDue: number
-  status: 'Active' | 'Inactive' | 'On Leave'
-  notes?: string
-}
+export default function SalesRepList() {
+  const { salesReps, deleteSalesRep, loading } = useSalesRep()
+  const [sortBy, setSortBy] = useState<'name' | 'signups' | 'commissions'>('signups')
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
 
-interface SalesRepListProps {
-  salesReps: SalesRep[]
-}
-
-export default function SalesRepList({ salesReps }: SalesRepListProps) {
-  const [sortField, setSortField] = useState<keyof SalesRep>('totalSignups')
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc')
-
-  const handleSort = (field: keyof SalesRep) => {
-    if (sortField === field) {
-      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')
-    } else {
-      setSortField(field)
-      setSortDirection('desc')
-    }
+  if (loading) {
+    return (
+      <div className="bg-gradient-to-br from-gray-900/40 to-black/40 border border-gray-500/20 rounded-lg backdrop-blur-sm">
+        <div className="p-12 text-center">
+          <div className="text-gray-400 text-lg mb-2">Loading sales representatives...</div>
+        </div>
+      </div>
+    )
   }
 
   const sortedReps = [...salesReps].sort((a, b) => {
-    const aValue = a[sortField]
-    const bValue = b[sortField]
-    
-    if (typeof aValue === 'string' && typeof bValue === 'string') {
-      return sortDirection === 'asc' 
-        ? aValue.localeCompare(bValue)
-        : bValue.localeCompare(aValue)
+    let aValue: string | number
+    let bValue: string | number
+
+    switch (sortBy) {
+      case 'name':
+        aValue = `${a.firstName} ${a.lastName}`
+        bValue = `${b.firstName} ${b.lastName}`
+        break
+      case 'signups':
+        aValue = a.totalSignups
+        bValue = b.totalSignups
+        break
+      case 'commissions':
+        aValue = a.commissionsEarned
+        bValue = b.commissionsEarned
+        break
+      default:
+        aValue = a.totalSignups
+        bValue = b.totalSignups
     }
-    
-    if (typeof aValue === 'number' && typeof bValue === 'number') {
-      return sortDirection === 'asc' ? aValue - bValue : bValue - aValue
+
+    if (sortOrder === 'asc') {
+      return aValue > bValue ? 1 : -1
+    } else {
+      return aValue < bValue ? 1 : -1
     }
-    
-    return 0
   })
+
+  const handleSort = (column: 'name' | 'signups' | 'commissions') => {
+    if (sortBy === column) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')
+    } else {
+      setSortBy(column)
+      setSortOrder('desc')
+    }
+  }
+
+  const handleDelete = (rep: any) => {
+    if (confirm(`Are you sure you want to delete ${rep.firstName} ${rep.lastName}? This action cannot be undone.`)) {
+      deleteSalesRep(rep.id)
+    }
+  }
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -85,67 +96,43 @@ export default function SalesRepList({ salesReps }: SalesRepListProps) {
             <tr className="border-b border-gray-500/20">
               <th 
                 className="text-left p-4 text-gray-300 font-medium cursor-pointer hover:text-white transition-colors"
-                onClick={() => handleSort('firstName')}
+                onClick={() => handleSort('name')}
               >
                 Name
-                {sortField === 'firstName' && (
-                  <span className="ml-1">{sortDirection === 'asc' ? '↑' : '↓'}</span>
+                {sortBy === 'name' && (
+                  <span className="ml-1">{sortOrder === 'asc' ? '↑' : '↓'}</span>
                 )}
               </th>
-              <th 
-                className="text-left p-4 text-gray-300 font-medium cursor-pointer hover:text-white transition-colors"
-                onClick={() => handleSort('role')}
-              >
+              <th className="text-left p-4 text-gray-300 font-medium">
                 Role
-                {sortField === 'role' && (
-                  <span className="ml-1">{sortDirection === 'asc' ? '↑' : '↓'}</span>
-                )}
               </th>
               <th 
                 className="text-left p-4 text-gray-300 font-medium cursor-pointer hover:text-white transition-colors"
-                onClick={() => handleSort('totalSignups')}
+                onClick={() => handleSort('signups')}
               >
                 Total Signups
-                {sortField === 'totalSignups' && (
-                  <span className="ml-1">{sortDirection === 'asc' ? '↑' : '↓'}</span>
+                {sortBy === 'signups' && (
+                  <span className="ml-1">{sortOrder === 'asc' ? '↑' : '↓'}</span>
                 )}
               </th>
               <th className="text-left p-4 text-gray-300 font-medium">Platform Breakdown</th>
               <th 
                 className="text-left p-4 text-gray-300 font-medium cursor-pointer hover:text-white transition-colors"
-                onClick={() => handleSort('commissionsEarned')}
+                onClick={() => handleSort('commissions')}
               >
                 Earned
-                {sortField === 'commissionsEarned' && (
-                  <span className="ml-1">{sortDirection === 'asc' ? '↑' : '↓'}</span>
+                {sortBy === 'commissions' && (
+                  <span className="ml-1">{sortOrder === 'asc' ? '↑' : '↓'}</span>
                 )}
               </th>
-              <th 
-                className="text-left p-4 text-gray-300 font-medium cursor-pointer hover:text-white transition-colors"
-                onClick={() => handleSort('commissionsPaid')}
-              >
+              <th className="text-left p-4 text-gray-300 font-medium">
                 Paid
-                {sortField === 'commissionsPaid' && (
-                  <span className="ml-1">{sortDirection === 'asc' ? '↑' : '↓'}</span>
-                )}
               </th>
-              <th 
-                className="text-left p-4 text-gray-300 font-medium cursor-pointer hover:text-white transition-colors"
-                onClick={() => handleSort('commissionsDue')}
-              >
+              <th className="text-left p-4 text-gray-300 font-medium">
                 Due
-                {sortField === 'commissionsDue' && (
-                  <span className="ml-1">{sortDirection === 'asc' ? '↑' : '↓'}</span>
-                )}
               </th>
-              <th 
-                className="text-left p-4 text-gray-300 font-medium cursor-pointer hover:text-white transition-colors"
-                onClick={() => handleSort('status')}
-              >
+              <th className="text-left p-4 text-gray-300 font-medium">
                 Status
-                {sortField === 'status' && (
-                  <span className="ml-1">{sortDirection === 'asc' ? '↑' : '↓'}</span>
-                )}
               </th>
               <th className="text-left p-4 text-gray-300 font-medium">Actions</th>
             </tr>
@@ -202,23 +189,30 @@ export default function SalesRepList({ salesReps }: SalesRepListProps) {
                 <td className="p-4">
                   <div className="flex space-x-2">
                     <button
+                      onClick={() => window.location.href = `/admin/reps/${rep.id}`}
                       className="p-2 text-gray-400 hover:text-cyan-400 hover:bg-cyan-500/10 rounded-lg transition-colors"
                       title="View Details"
                     >
                       <EyeIcon className="h-4 w-4" />
                     </button>
                     <button
+                      onClick={() => window.location.href = `/admin/reps/${rep.id}/edit`}
                       className="p-2 text-gray-400 hover:text-yellow-400 hover:bg-yellow-500/10 rounded-lg transition-colors"
                       title="Edit Rep"
                     >
                       <PencilIcon className="h-4 w-4" />
                     </button>
-                    <button
-                      className="p-2 text-gray-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
-                      title="Delete Rep"
-                    >
-                      <TrashIcon className="h-4 w-4" />
-                    </button>
+                    <button 
+                            onClick={() => {
+                              if (confirm(`Are you sure you want to delete ${rep.firstName} ${rep.lastName}? This action cannot be undone.`)) {
+                                deleteSalesRep(rep.id)
+                              }
+                            }}
+                            className="p-2 text-gray-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                            title="Delete Rep"
+                          >
+                            <TrashIcon className="h-4 w-4" />
+                          </button>
                   </div>
                 </td>
               </tr>

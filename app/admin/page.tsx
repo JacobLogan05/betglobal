@@ -1,482 +1,407 @@
-import { auth, currentUser } from '@clerk/nextjs/server'
-import { UserButton } from '@clerk/nextjs'
-import { redirect } from 'next/navigation'
-import { db } from '@/lib/db'
-import { users, signups, commissions } from '@/lib/db/schema'
-import { eq, count, sum, and, desc } from 'drizzle-orm'
+'use client'
+
+import { useState, useEffect } from 'react'
 import DashboardLayout from '@/app/components/DashboardLayout'
 import { 
-  ArrowTrendingUpIcon, 
-  CurrencyDollarIcon, 
+  ChartBarIcon, 
   UsersIcon, 
-  ChartBarIcon,
+  CurrencyDollarIcon, 
+  TrophyIcon,
   SparklesIcon,
   BoltIcon,
   FireIcon,
-  StarIcon
+  StarIcon,
+  RocketLaunchIcon,
+  LightBulbIcon,
+  BeakerIcon,
+  EyeIcon,
+  ClockIcon,
+  ArrowTrendingUpIcon,
+  ArrowTrendingDownIcon
 } from '@heroicons/react/24/outline'
+import { useSalesRep } from '@/app/contexts/SalesRepContext'
 
-export default async function AdminDashboard() {
-  const { userId } = await auth()
-  
-  if (!userId) {
-    redirect('/sign-in')
-  }
+export default function AdminDashboard() {
+  const { salesReps, loading } = useSalesRep()
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
+  const [isVisible, setIsVisible] = useState(false)
 
-  // Simple user check without complex database operations
-  let currentUserData: any = { firstName: 'Admin', lastName: 'User', role: 'admin' }
-  
-  try {
-    const user = await db.select().from(users).where(eq(users.clerkId, userId)).limit(1)
-    if (user.length > 0) {
-      currentUserData = user[0]
-    } else {
-      // Try to create user but don't fail if it doesn't work
-      try {
-        const clerkUser = await currentUser()
-        if (clerkUser) {
-          await db.insert(users).values({
-            clerkId: userId,
-            email: clerkUser.emailAddresses[0]?.emailAddress || '',
-            firstName: clerkUser.firstName || 'Admin',
-            lastName: clerkUser.lastName || 'User',
-            role: 'admin'
-          })
-          const newUser = await db.select().from(users).where(eq(users.clerkId, userId)).limit(1)
-          if (newUser.length > 0) currentUserData = newUser[0]
-        }
-      } catch (createError) {
-        console.log('User creation failed, using defaults:', createError)
-      }
+  useEffect(() => {
+    setIsVisible(true)
+    const handleMouseMove = (e: MouseEvent) => {
+      setMousePosition({ x: e.clientX, y: e.clientY })
     }
-  } catch (error) {
-    console.log('Database connection issue, using default user data:', error)
+    window.addEventListener('mousemove', handleMouseMove)
+    return () => window.removeEventListener('mousemove', handleMouseMove)
+  }, [])
+
+  // Calculate KPIs
+  const totalReps = salesReps.length
+  const totalSignups = salesReps.reduce((sum, rep) => sum + rep.totalSignups, 0)
+  const totalCommissions = salesReps.reduce((sum, rep) => sum + rep.commissionsEarned, 0)
+  const avgSignupsPerRep = totalReps > 0 ? Math.round(totalSignups / totalReps) : 0
+
+  const topPerformers = salesReps
+    .sort((a, b) => b.totalSignups - a.totalSignups)
+    .slice(0, 5)
+
+  if (loading) {
+    return (
+      <DashboardLayout>
+        {/* Revolutionary Loading Background */}
+        <div className="fixed inset-0 bg-gradient-to-br from-slate-950 via-gray-950 to-slate-950"></div>
+        <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-blue-900/20 via-slate-950/50 to-slate-950"></div>
+        
+        {/* Quantum Loading Spinner */}
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="relative">
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-400/20 to-purple-500/20 blur-3xl rounded-full animate-pulse"></div>
+            <div className="relative w-32 h-32 border-4 border-blue-400/30 border-t-blue-400 rounded-full animate-spin"></div>
+            <div className="absolute inset-4 border-4 border-purple-400/30 border-t-purple-400 rounded-full animate-spin animate-reverse"></div>
+            <div className="absolute inset-8 border-4 border-green-400/30 border-t-green-400 rounded-full animate-spin"></div>
+          </div>
+        </div>
+      </DashboardLayout>
+    )
   }
-
-  // Mock data for dashboard display
-  const mockStats = {
-    totalSignups: 247,
-    totalRevenue: 18540,
-    totalProfit: 12360,
-    totalCommissionsPaid: 4180,
-    commissionsOwed: 2000,
-    activeReps: 8,
-    bovadaSignups: 156,
-    bovadaRevenue: 12480,
-    bovadaCommissions: 2640,
-    chalkboardSignups: 91,
-    chalkboardRevenue: 6060,
-    chalkboardCommissions: 1540
-  }
-
-  // Mock sales rep data
-  const mockReps = [
-    {
-      id: 1,
-      firstName: 'Sarah',
-      lastName: 'Johnson',
-      role: 'Senior Sales Rep',
-      totalSignups: 45,
-      bovadaSignups: 28,
-      chalkboardSignups: 17,
-      commissionsEarned: 1800,
-      commissionsPaid: 1200,
-      commissionsDue: 600,
-      status: 'Active',
-      notes: 'Top performer this quarter'
-    },
-    {
-      id: 2,
-      firstName: 'Mike',
-      lastName: 'Chen',
-      role: 'Sales Rep',
-      totalSignups: 38,
-      bovadaSignups: 23,
-      chalkboardSignups: 15,
-      commissionsEarned: 1520,
-      commissionsPaid: 1000,
-      commissionsDue: 520,
-      status: 'Active',
-      notes: 'Consistent performance'
-    },
-    {
-      id: 3,
-      firstName: 'Emily',
-      lastName: 'Rodriguez',
-      role: 'Sales Rep',
-      totalSignups: 52,
-      bovadaSignups: 31,
-      chalkboardSignups: 21,
-      commissionsEarned: 2080,
-      commissionsPaid: 1500,
-      commissionsDue: 580,
-      status: 'Active',
-      notes: 'Excellent closer'
-    },
-    {
-      id: 4,
-      firstName: 'David',
-      lastName: 'Thompson',
-      role: 'Junior Sales Rep',
-      totalSignups: 29,
-      bovadaSignups: 18,
-      chalkboardSignups: 11,
-      commissionsEarned: 1160,
-      commissionsPaid: 800,
-      commissionsDue: 360,
-      status: 'Active',
-      notes: 'Improving steadily'
-    },
-    {
-      id: 5,
-      firstName: 'Jessica',
-      lastName: 'Williams',
-      role: 'Sales Rep',
-      totalSignups: 41,
-      bovadaSignups: 25,
-      chalkboardSignups: 16,
-      commissionsEarned: 1640,
-      commissionsPaid: 1100,
-      commissionsDue: 540,
-      status: 'Active',
-      notes: 'Strong relationship builder'
-    },
-    {
-      id: 6,
-      firstName: 'Alex',
-      lastName: 'Martinez',
-      role: 'Sales Rep',
-      totalSignups: 33,
-      bovadaSignups: 21,
-      chalkboardSignups: 12,
-      commissionsEarned: 1320,
-      commissionsPaid: 900,
-      commissionsDue: 420,
-      status: 'Inactive',
-      notes: 'On temporary leave'
-    }
-  ]
-
-  // Mock weekly data for charts
-  const weeklySignups = [12, 18, 15, 22, 28, 25, 31]
-  const weeklyRevenue = [960, 1440, 1200, 1760, 2240, 2000, 2480]
 
   return (
-    <DashboardLayout currentUser={currentUserData}>
-      <div className="space-y-12">
-        {/* Hero Section */}
+    <DashboardLayout>
+      {/* Revolutionary Backdrop */}
+      <div className="fixed inset-0 bg-gradient-to-br from-slate-950 via-gray-950 to-slate-950"></div>
+      <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-900/20 via-slate-950/50 to-slate-950"></div>
+      <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_bottom_right,_var(--tw-gradient-stops))] from-purple-900/20 via-transparent to-transparent"></div>
+      
+      {/* Multi-Dimensional Background Architecture */}
+      <div className="fixed inset-0 opacity-40">
+        <div className="absolute top-0 left-0 w-full h-full bg-[linear-gradient(45deg,transparent_25%,rgba(59,130,246,0.05)_50%,transparent_75%)] bg-[length:60px_60px] animate-pulse"></div>
+        <div className="absolute top-0 left-0 w-full h-full bg-[linear-gradient(-45deg,transparent_25%,rgba(147,51,234,0.05)_50%,transparent_75%)] bg-[length:60px_60px] animate-pulse delay-1000"></div>
+      </div>
+      
+      {/* Animated Background Orbs */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -left-40 w-80 h-80 bg-gradient-to-br from-yellow-500/10 to-orange-500/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute -top-20 -right-20 w-60 h-60 bg-gradient-to-br from-orange-500/10 to-red-500/10 rounded-full blur-2xl animate-pulse delay-1000"></div>
+        <div className="absolute -bottom-20 left-1/2 w-72 h-72 bg-gradient-to-br from-red-500/10 to-pink-500/10 rounded-full blur-3xl animate-pulse delay-500"></div>
+      </div>
+
+      {/* Revolutionary Cursor Follower */}
+        <div 
+          className="fixed pointer-events-none z-50 w-6 h-6 bg-gradient-to-r from-yellow-400/30 to-orange-400/30 rounded-full blur-sm transition-all duration-300 ease-out"
+          style={{
+            left: mousePosition.x - 12,
+            top: mousePosition.y - 12,
+            transform: `scale(${isVisible ? 1 : 0})`,
+          }}
+        />
+
+      <div className={`relative space-y-12 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+        {/* Revolutionary Hero Section */}
         <div className="relative">
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-purple-500/5 to-pink-500/5 rounded-3xl blur-3xl"></div>
-          <div className="relative bg-gradient-to-br from-white/[0.08] to-white/[0.02] backdrop-blur-xl border border-white/10 rounded-3xl p-12 shadow-2xl">
-            <div className="flex items-center justify-between">
-              <div className="space-y-6">
-                <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-purple-500 rounded-2xl flex items-center justify-center shadow-lg">
-                    <SparklesIcon className="h-7 w-7 text-white" />
+          {/* Quantum Header */}
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-yellow-400 via-orange-500 to-red-500 rounded-3xl mb-8 shadow-2xl shadow-yellow-500/25 relative">
+              <div className="absolute inset-0 bg-gradient-to-br from-yellow-400 via-orange-500 to-red-500 rounded-3xl blur-xl opacity-50 animate-pulse"></div>
+              <ChartBarIcon className="h-10 w-10 text-white relative z-10" />
+            </div>
+            
+            <h1 className="text-7xl font-black mb-6 relative">
+              <span className="bg-gradient-to-r from-white via-yellow-200 to-orange-300 bg-clip-text text-transparent">
+                ADMIN
+              </span>
+              <br />
+              <span className="bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 bg-clip-text text-transparent">
+                COMMAND
+              </span>
+            </h1>
+            
+            <div className="flex items-center justify-center space-x-4 text-gray-300">
+              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+              <span className="text-lg font-medium">Elite Financial Operations Center</span>
+              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+            </div>
+            
+            <div className="mt-4 text-sm text-gray-400 font-mono">
+              ALL SYSTEMS OPERATIONAL
+            </div>
+          </div>
+        </div>
+
+        {/* Revolutionary KPIs Grid */}
+        <div className="relative">
+          <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/10 via-orange-500/5 to-red-500/10 blur-3xl rounded-[2rem]"></div>
+          <div className="relative grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* Total Sales Reps - Golden Quantum */}
+            <div className="group relative overflow-hidden">
+              {/* Multi-layered glow system */}
+              <div className="absolute -inset-1 bg-gradient-to-br from-yellow-400/20 via-orange-500/20 to-red-500/20 rounded-2xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <div className="absolute -inset-2 bg-gradient-to-br from-yellow-400/10 via-orange-500/10 to-red-500/10 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+              
+              <div className="relative bg-gradient-to-br from-white/[0.12] via-white/[0.08] to-white/[0.04] backdrop-blur-2xl border-2 border-yellow-500/30 rounded-2xl p-6 shadow-2xl group-hover:border-yellow-400/50 transition-all duration-500">
+                <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/5 via-orange-500/5 to-red-500/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                
+                <div className="relative space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="relative">
+                      <div className="absolute inset-0 bg-gradient-to-br from-yellow-400/30 to-orange-500/30 blur-xl rounded-xl"></div>
+                      <div className="relative w-14 h-14 bg-gradient-to-br from-yellow-400 via-orange-500 to-red-500 rounded-xl flex items-center justify-center shadow-lg shadow-yellow-500/30">
+                        <UsersIcon className="h-7 w-7 text-white animate-pulse" />
+                        <FireIcon className="absolute -top-1 -right-1 h-4 w-4 text-yellow-200 animate-bounce" />
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-5xl font-black bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 bg-clip-text text-transparent drop-shadow-2xl">
+                        {totalReps}
+                      </div>
+                      <div className="text-sm text-yellow-300 font-black tracking-widest uppercase">
+                        ELITE AGENTS
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <h1 className="text-5xl font-bold bg-gradient-to-r from-white via-blue-100 to-purple-200 bg-clip-text text-transparent tracking-tight">
-                      Command Center
-                    </h1>
-                    <p className="text-xl text-gray-400 mt-2 font-light">
-                      Welcome back, <span className="text-white font-medium">{currentUserData?.firstName}</span>. Your empire awaits.
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-8">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-3 h-3 bg-gradient-to-r from-green-400 to-emerald-400 rounded-full animate-pulse shadow-lg shadow-green-400/50"></div>
-                    <span className="text-sm text-gray-300 font-medium">All Systems Operational</span>
-                  </div>
-                  <div className="text-sm text-gray-400 font-mono">
-                    {new Date().toLocaleString('en-US', { 
-                      weekday: 'long', 
-                      year: 'numeric', 
-                      month: 'long', 
-                      day: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit'
-                    })}
+                  
+                  <div className="space-y-3">
+                    <div className="text-lg text-gray-200 font-black uppercase tracking-wider">ACTIVE REPRESENTATIVES</div>
+                    <div className="w-full bg-black/50 rounded-full h-3 shadow-inner">
+                      <div className="bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 h-3 rounded-full shadow-lg shadow-yellow-500/50 animate-pulse" style={{ width: '100%' }}></div>
+                    </div>
                   </div>
                 </div>
               </div>
-              <div className="hidden lg:block">
-                <div className="w-32 h-32 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-full flex items-center justify-center backdrop-blur-sm border border-white/10">
-                  <BoltIcon className="h-16 w-16 text-white/80" />
+            </div>
+
+            {/* Total Signups */}
+            <div className="group relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-white/[0.12] via-white/[0.08] to-white/[0.04] backdrop-blur-2xl rounded-2xl"></div>
+              <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 via-transparent to-emerald-500/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <div className="absolute inset-0 border border-white/20 rounded-2xl group-hover:border-green-400/30 transition-colors duration-500"></div>
+              
+              <div className="relative p-6 space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="relative">
+                    <div className="absolute inset-0 bg-gradient-to-br from-green-400/20 to-emerald-500/20 blur-xl rounded-xl"></div>
+                    <div className="relative w-12 h-12 bg-gradient-to-br from-green-400 to-emerald-500 rounded-xl flex items-center justify-center">
+                      <TrophyIcon className="h-6 w-6 text-white" />
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-3xl font-black bg-gradient-to-r from-white to-green-200 bg-clip-text text-transparent">
+                      {totalSignups}
+                    </div>
+                    <div className="text-xs text-green-300 font-semibold tracking-wide uppercase">
+                      TOTAL SIGNUPS
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <div className="text-sm text-gray-300 font-medium">Customer Acquisitions</div>
+                  <div className="w-full bg-black/30 rounded-full h-2">
+                    <div className="bg-gradient-to-r from-green-400 to-emerald-500 h-2 rounded-full" style={{ width: '85%' }}></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Total Commissions */}
+            <div className="group relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-white/[0.12] via-white/[0.08] to-white/[0.04] backdrop-blur-2xl rounded-2xl"></div>
+              <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/10 via-transparent to-orange-500/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <div className="absolute inset-0 border border-white/20 rounded-2xl group-hover:border-yellow-400/30 transition-colors duration-500"></div>
+              
+              <div className="relative p-6 space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="relative">
+                    <div className="absolute inset-0 bg-gradient-to-br from-yellow-400/20 to-orange-500/20 blur-xl rounded-xl"></div>
+                    <div className="relative w-12 h-12 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-xl flex items-center justify-center">
+                      <CurrencyDollarIcon className="h-6 w-6 text-white" />
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-3xl font-black bg-gradient-to-r from-white to-yellow-200 bg-clip-text text-transparent">
+                      ${totalCommissions.toLocaleString()}
+                    </div>
+                    <div className="text-xs text-yellow-300 font-semibold tracking-wide uppercase">
+                      COMMISSIONS
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <div className="text-sm text-gray-300 font-medium">Total Earnings</div>
+                  <div className="w-full bg-black/30 rounded-full h-2">
+                    <div className="bg-gradient-to-r from-yellow-400 to-orange-500 h-2 rounded-full" style={{ width: '92%' }}></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Average Signups */}
+            <div className="group relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-white/[0.12] via-white/[0.08] to-white/[0.04] backdrop-blur-2xl rounded-2xl"></div>
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 via-transparent to-pink-500/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <div className="absolute inset-0 border border-white/20 rounded-2xl group-hover:border-purple-400/30 transition-colors duration-500"></div>
+              
+              <div className="relative p-6 space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="relative">
+                    <div className="absolute inset-0 bg-gradient-to-br from-purple-400/20 to-pink-500/20 blur-xl rounded-xl"></div>
+                    <div className="relative w-12 h-12 bg-gradient-to-br from-purple-400 to-pink-500 rounded-xl flex items-center justify-center">
+                      <ChartBarIcon className="h-6 w-6 text-white" />
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-3xl font-black bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
+                      {avgSignupsPerRep}
+                    </div>
+                    <div className="text-xs text-purple-300 font-semibold tracking-wide uppercase">
+                      AVG PER REP
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <div className="text-sm text-gray-300 font-medium">Performance Average</div>
+                  <div className="w-full bg-black/30 rounded-full h-2">
+                    <div className="bg-gradient-to-r from-purple-400 to-pink-500 h-2 rounded-full" style={{ width: '78%' }}></div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Primary KPIs */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          <div className="group relative">
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-all duration-500"></div>
-            <div className="relative bg-gradient-to-br from-white/[0.08] to-white/[0.02] backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-105">
-              <div className="flex items-center justify-between mb-6">
-                <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-cyan-400 rounded-xl flex items-center justify-center shadow-lg">
-                  <ArrowTrendingUpIcon className="h-6 w-6 text-white" />
-                </div>
-                <div className="text-blue-400 text-sm font-medium">+12.5%</div>
-              </div>
-              <div className="space-y-2">
-                <div className="text-3xl font-bold text-white">{mockStats.totalSignups.toLocaleString()}</div>
-                <div className="text-sm text-gray-400 font-medium">Total Signups</div>
-                <div className="text-xs text-blue-400">All platforms combined</div>
-              </div>
-            </div>
-          </div>
-
-          <div className="group relative">
-            <div className="absolute inset-0 bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-all duration-500"></div>
-            <div className="relative bg-gradient-to-br from-white/[0.08] to-white/[0.02] backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-105">
-              <div className="flex items-center justify-between mb-6">
-                <div className="w-12 h-12 bg-gradient-to-br from-green-400 to-emerald-400 rounded-xl flex items-center justify-center shadow-lg">
-                  <CurrencyDollarIcon className="h-6 w-6 text-white" />
-                </div>
-                <div className="text-green-400 text-sm font-medium">+8.3%</div>
-              </div>
-              <div className="space-y-2">
-                <div className="text-3xl font-bold text-white">${mockStats.totalRevenue.toLocaleString()}</div>
-                <div className="text-sm text-gray-400 font-medium">Total Revenue</div>
-                <div className="text-xs text-green-400">Gross income generated</div>
-              </div>
-            </div>
-          </div>
-
-          <div className="group relative">
-            <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-all duration-500"></div>
-            <div className="relative bg-gradient-to-br from-white/[0.08] to-white/[0.02] backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-105">
-              <div className="flex items-center justify-between mb-6">
-                <div className="w-12 h-12 bg-gradient-to-br from-purple-400 to-pink-400 rounded-xl flex items-center justify-center shadow-lg">
-                  <StarIcon className="h-6 w-6 text-white" />
-                </div>
-                <div className="text-purple-400 text-sm font-medium">+15.7%</div>
-              </div>
-              <div className="space-y-2">
-                <div className="text-3xl font-bold text-white">${mockStats.totalProfit.toLocaleString()}</div>
-                <div className="text-sm text-gray-400 font-medium">Net Profit</div>
-                <div className="text-xs text-purple-400">After all commissions</div>
-              </div>
-            </div>
-          </div>
-
-          <div className="group relative">
-            <div className="absolute inset-0 bg-gradient-to-r from-orange-500/20 to-red-500/20 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-all duration-500"></div>
-            <div className="relative bg-gradient-to-br from-white/[0.08] to-white/[0.02] backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-105">
-              <div className="flex items-center justify-between mb-6">
-                <div className="w-12 h-12 bg-gradient-to-br from-orange-400 to-red-400 rounded-xl flex items-center justify-center shadow-lg">
-                  <UsersIcon className="h-6 w-6 text-white" />
-                </div>
-                <div className="text-orange-400 text-sm font-medium">Active</div>
-              </div>
-              <div className="space-y-2">
-                <div className="text-3xl font-bold text-white">{mockStats.activeReps}</div>
-                <div className="text-sm text-gray-400 font-medium">Sales Team</div>
-                <div className="text-xs text-orange-400">Representatives online</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Platform Performance */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Revolutionary Charts Section */}
+        <div className="relative grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Weekly Performance Chart */}
           <div className="relative group">
-            <div className="absolute inset-0 bg-gradient-to-r from-orange-500/10 to-red-500/10 rounded-3xl blur-2xl opacity-0 group-hover:opacity-100 transition-all duration-700"></div>
-            <div className="relative bg-gradient-to-br from-white/[0.08] to-white/[0.02] backdrop-blur-xl border border-white/10 rounded-3xl p-10 shadow-xl">
-              <div className="flex items-center justify-between mb-8">
+            <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 via-emerald-500/5 to-teal-500/10 blur-3xl rounded-[2rem]"></div>
+            <div className="relative bg-gradient-to-br from-white/[0.12] via-white/[0.08] to-white/[0.04] backdrop-blur-2xl border border-white/20 rounded-2xl p-8 shadow-2xl group-hover:shadow-green-500/10 transition-all duration-500">
+              <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 via-transparent to-emerald-500/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              
+              <div className="relative space-y-6">
                 <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 bg-gradient-to-br from-orange-400 to-red-400 rounded-xl flex items-center justify-center shadow-lg">
-                    <FireIcon className="h-6 w-6 text-white" />
+                  <div className="relative">
+                    <div className="absolute inset-0 bg-gradient-to-br from-green-400/20 to-emerald-500/20 blur-xl rounded-xl"></div>
+                    <div className="relative w-10 h-10 bg-gradient-to-br from-green-400 to-emerald-500 rounded-xl flex items-center justify-center">
+                      <ArrowTrendingUpIcon className="h-5 w-5 text-white" />
+                    </div>
                   </div>
                   <div>
-                    <h3 className="text-2xl font-bold text-white">Bovada Platform</h3>
-                    <p className="text-gray-400">Primary revenue driver</p>
+                    <h3 className="text-xl font-bold bg-gradient-to-r from-white to-green-200 bg-clip-text text-transparent">
+                      WEEKLY PERFORMANCE
+                    </h3>
+                    <p className="text-green-300/80 text-sm">Signups & Commissions Trend</p>
                   </div>
                 </div>
-                <div className="text-right">
-                  <div className="text-orange-400 text-sm font-medium">+18.2%</div>
-                  <div className="text-xs text-gray-500">vs last month</div>
-                </div>
-              </div>
-              <div className="grid grid-cols-3 gap-6">
-                <div className="text-center p-6 bg-white/[0.03] rounded-2xl border border-white/5">
-                  <div className="text-3xl font-bold text-orange-400 mb-2">{mockStats.bovadaSignups}</div>
-                  <div className="text-sm text-gray-400">Signups</div>
-                </div>
-                <div className="text-center p-6 bg-white/[0.03] rounded-2xl border border-white/5">
-                  <div className="text-3xl font-bold text-orange-400 mb-2">${mockStats.bovadaRevenue.toLocaleString()}</div>
-                  <div className="text-sm text-gray-400">Revenue</div>
-                </div>
-                <div className="text-center p-6 bg-white/[0.03] rounded-2xl border border-white/5">
-                  <div className="text-3xl font-bold text-orange-400 mb-2">${mockStats.bovadaCommissions.toLocaleString()}</div>
-                  <div className="text-sm text-gray-400">Commissions</div>
+                
+                <div className="h-64 flex items-center justify-center">
+                  <div className="text-center">
+                    <div className="relative mb-4">
+                      <div className="w-16 h-16 mx-auto rounded-full bg-gradient-to-r from-green-500 to-emerald-500 flex items-center justify-center">
+                        <ArrowTrendingUpIcon className="h-8 w-8 text-white" />
+                      </div>
+                      <div className="absolute inset-0 w-16 h-16 mx-auto rounded-full bg-gradient-to-r from-green-500 to-emerald-500 blur-lg opacity-30"></div>
+                    </div>
+                    <p className="text-gray-400">Chart visualization coming soon</p>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
 
+          {/* Platform Distribution */}
           <div className="relative group">
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-indigo-500/10 rounded-3xl blur-2xl opacity-0 group-hover:opacity-100 transition-all duration-700"></div>
-            <div className="relative bg-gradient-to-br from-white/[0.08] to-white/[0.02] backdrop-blur-xl border border-white/10 rounded-3xl p-10 shadow-xl">
-              <div className="flex items-center justify-between mb-8">
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-purple-500/5 to-indigo-500/10 blur-3xl rounded-[2rem]"></div>
+            <div className="relative bg-gradient-to-br from-white/[0.12] via-white/[0.08] to-white/[0.04] backdrop-blur-2xl border border-white/20 rounded-2xl p-8 shadow-2xl group-hover:shadow-blue-500/10 transition-all duration-500">
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-transparent to-purple-500/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              
+              <div className="relative space-y-6">
                 <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-indigo-400 rounded-xl flex items-center justify-center shadow-lg">
-                    <ChartBarIcon className="h-6 w-6 text-white" />
+                  <div className="relative">
+                    <div className="absolute inset-0 bg-gradient-to-br from-blue-400/20 to-purple-500/20 blur-xl rounded-xl"></div>
+                    <div className="relative w-10 h-10 bg-gradient-to-br from-blue-400 to-purple-500 rounded-xl flex items-center justify-center">
+                      <ChartBarIcon className="h-5 w-5 text-white" />
+                    </div>
                   </div>
                   <div>
-                    <h3 className="text-2xl font-bold text-white">Chalkboard Platform</h3>
-                    <p className="text-gray-400">Growing market segment</p>
+                    <h3 className="text-xl font-bold bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">
+                      PLATFORM DISTRIBUTION
+                    </h3>
+                    <p className="text-blue-300/80 text-sm">Signup Sources Breakdown</p>
                   </div>
                 </div>
-                <div className="text-right">
-                  <div className="text-blue-400 text-sm font-medium">+24.7%</div>
-                  <div className="text-xs text-gray-500">vs last month</div>
-                </div>
-              </div>
-              <div className="grid grid-cols-3 gap-6">
-                <div className="text-center p-6 bg-white/[0.03] rounded-2xl border border-white/5">
-                  <div className="text-3xl font-bold text-blue-400 mb-2">{mockStats.chalkboardSignups}</div>
-                  <div className="text-sm text-gray-400">Signups</div>
-                </div>
-                <div className="text-center p-6 bg-white/[0.03] rounded-2xl border border-white/5">
-                  <div className="text-3xl font-bold text-blue-400 mb-2">${mockStats.chalkboardRevenue.toLocaleString()}</div>
-                  <div className="text-sm text-gray-400">Revenue</div>
-                </div>
-                <div className="text-center p-6 bg-white/[0.03] rounded-2xl border border-white/5">
-                  <div className="text-3xl font-bold text-blue-400 mb-2">${mockStats.chalkboardCommissions.toLocaleString()}</div>
-                  <div className="text-sm text-gray-400">Commissions</div>
+                
+                <div className="h-64 flex items-center justify-center">
+                  <div className="text-center">
+                    <div className="relative mb-4">
+                      <div className="w-16 h-16 mx-auto rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center">
+                        <ChartBarIcon className="h-8 w-8 text-white" />
+                      </div>
+                      <div className="absolute inset-0 w-16 h-16 mx-auto rounded-full bg-gradient-to-r from-blue-500 to-purple-500 blur-lg opacity-30"></div>
+                    </div>
+                    <p className="text-gray-400">Chart visualization coming soon</p>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Sales Team Overview */}
-        <div className="relative group">
-          <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 to-pink-500/5 rounded-3xl blur-3xl opacity-0 group-hover:opacity-100 transition-all duration-700"></div>
-          <div className="relative bg-gradient-to-br from-white/[0.08] to-white/[0.02] backdrop-blur-xl border border-white/10 rounded-3xl shadow-xl overflow-hidden">
-            <div className="p-10 border-b border-white/10">
-              <div className="flex items-center justify-between">
+        {/* Revolutionary Top Performers */}
+        <div className="relative">
+          <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 via-pink-500/5 to-rose-500/10 blur-3xl rounded-[2rem]"></div>
+          <div className="relative bg-gradient-to-br from-white/[0.12] via-white/[0.08] to-white/[0.04] backdrop-blur-2xl border border-white/20 rounded-2xl p-8 shadow-2xl group hover:shadow-purple-500/10 transition-all duration-500">
+            <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 via-transparent to-pink-500/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            
+            <div className="relative space-y-6">
+              <div className="flex items-center space-x-4">
+                <div className="relative">
+                  <div className="absolute inset-0 bg-gradient-to-br from-purple-400/20 to-pink-500/20 blur-xl rounded-xl"></div>
+                  <div className="relative w-12 h-12 bg-gradient-to-br from-purple-400 to-pink-500 rounded-xl flex items-center justify-center">
+                    <TrophyIcon className="h-6 w-6 text-white" />
+                  </div>
+                </div>
                 <div>
-                  <h2 className="text-3xl font-bold text-white mb-2">Elite Sales Force</h2>
-                  <p className="text-gray-400 text-lg">Performance metrics for your top performers</p>
-                </div>
-                <div className="text-right">
-                  <div className="text-sm text-gray-400">Team Size</div>
-                  <div className="text-3xl font-bold text-white">{mockReps.length}</div>
+                  <h3 className="text-2xl font-bold bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
+                    TOP PERFORMERS
+                  </h3>
+                  <p className="text-purple-300/80">Elite agent leaderboard</p>
                 </div>
               </div>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-white/5">
-                    <th className="text-left p-6 text-gray-300 font-semibold text-sm tracking-wider">REPRESENTATIVE</th>
-                    <th className="text-left p-6 text-gray-300 font-semibold text-sm tracking-wider">ROLE</th>
-                    <th className="text-center p-6 text-gray-300 font-semibold text-sm tracking-wider">SIGNUPS</th>
-                    <th className="text-center p-6 text-gray-300 font-semibold text-sm tracking-wider">EARNED</th>
-                    <th className="text-center p-6 text-gray-300 font-semibold text-sm tracking-wider">PAID</th>
-                    <th className="text-center p-6 text-gray-300 font-semibold text-sm tracking-wider">DUE</th>
-                    <th className="text-center p-6 text-gray-300 font-semibold text-sm tracking-wider">STATUS</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {mockReps.map((rep, index) => (
-                    <tr key={rep.id} className="border-b border-white/5 hover:bg-white/[0.02] transition-all duration-300 group/row">
-                      <td className="p-6">
-                        <div className="flex items-center space-x-4">
-                          <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-purple-400 rounded-full flex items-center justify-center text-white font-bold text-sm">
-                            {rep.firstName[0]}{rep.lastName[0]}
-                          </div>
-                          <div className="text-white font-semibold text-lg group-hover/row:text-blue-300 transition-colors">
-                            {rep.firstName} {rep.lastName}
+              
+              <div className="space-y-4">
+                {topPerformers.map((rep, index) => (
+                  <div key={rep.id} className="group/item relative">
+                    <div className="absolute inset-0 bg-gradient-to-r from-white/[0.08] via-white/[0.05] to-white/[0.02] backdrop-blur-xl rounded-xl opacity-0 group-hover/item:opacity-100 transition-opacity duration-300"></div>
+                    <div className="relative flex items-center justify-between p-4 border border-white/10 rounded-xl group-hover/item:border-purple-400/30 transition-colors duration-300">
+                      <div className="flex items-center space-x-4">
+                        <div className="relative">
+                          <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
+                            index === 0 ? 'bg-gradient-to-br from-yellow-400 to-orange-500 text-white' :
+                            index === 1 ? 'bg-gradient-to-br from-gray-300 to-gray-500 text-white' :
+                            index === 2 ? 'bg-gradient-to-br from-orange-400 to-red-500 text-white' :
+                            'bg-gradient-to-br from-purple-400 to-pink-500 text-white'
+                          }`}>
+                            {index + 1}
                           </div>
                         </div>
-                      </td>
-                      <td className="p-6">
-                        <div className="text-gray-300 font-medium">{rep.role}</div>
-                      </td>
-                      <td className="p-6 text-center">
-                        <div className="text-2xl font-bold text-cyan-400">{rep.totalSignups}</div>
-                      </td>
-                      <td className="p-6 text-center">
-                        <div className="text-2xl font-bold text-green-400">${rep.commissionsEarned.toLocaleString()}</div>
-                      </td>
-                      <td className="p-6 text-center">
-                        <div className="text-2xl font-bold text-blue-400">${rep.commissionsPaid.toLocaleString()}</div>
-                      </td>
-                      <td className="p-6 text-center">
-                        <div className="text-2xl font-bold text-yellow-400">${rep.commissionsDue.toLocaleString()}</div>
-                      </td>
-                      <td className="p-6 text-center">
-                        <span className={`px-4 py-2 rounded-full text-sm font-bold border ${
-                          rep.status === 'Active' 
-                            ? 'bg-green-500/20 text-green-300 border-green-500/30' 
-                            : 'bg-red-500/20 text-red-300 border-red-500/30'
-                        }`}>
-                          {rep.status}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-
-        {/* Performance Analytics */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div className="relative group">
-            <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/10 to-blue-500/10 rounded-3xl blur-2xl opacity-0 group-hover:opacity-100 transition-all duration-700"></div>
-            <div className="relative bg-gradient-to-br from-white/[0.08] to-white/[0.02] backdrop-blur-xl border border-white/10 rounded-3xl p-10 shadow-xl">
-              <div className="flex items-center justify-between mb-8">
-                <div>
-                  <h3 className="text-2xl font-bold text-white mb-2">Weekly Acquisition</h3>
-                  <p className="text-gray-400">Signup performance trends</p>
-                </div>
-                <div className="text-cyan-400 text-sm font-medium">+23.4% this week</div>
-              </div>
-              <div className="h-64 flex items-end justify-between space-x-3">
-                {weeklySignups.map((signups, index) => (
-                  <div key={index} className="flex-1 flex flex-col items-center group/bar">
-                    <div 
-                      className="w-full bg-gradient-to-t from-cyan-500 to-cyan-300 rounded-t-lg transition-all duration-700 hover:from-cyan-400 hover:to-cyan-200 group-hover/bar:shadow-lg group-hover/bar:shadow-cyan-500/50"
-                      style={{ height: `${(signups / Math.max(...weeklySignups)) * 200}px` }}
-                    ></div>
-                    <div className="text-xs text-gray-400 mt-3 font-medium">
-                      {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][index]}
+                        <div>
+                          <div className="font-bold text-white">
+                            {rep.firstName} {rep.lastName}
+                          </div>
+                          <div className="text-sm text-gray-400">{rep.email}</div>
+                        </div>
+                      </div>
+                      
+                      <div className="text-right">
+                        <div className="font-bold text-lg bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
+                          {rep.totalSignups} signups
+                        </div>
+                        <div className="text-sm text-purple-300">
+                          ${rep.commissionsEarned.toLocaleString()}
+                        </div>
+                      </div>
                     </div>
-                    <div className="text-sm text-cyan-300 font-bold">{signups}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <div className="relative group">
-            <div className="absolute inset-0 bg-gradient-to-r from-green-500/10 to-emerald-500/10 rounded-3xl blur-2xl opacity-0 group-hover:opacity-100 transition-all duration-700"></div>
-            <div className="relative bg-gradient-to-br from-white/[0.08] to-white/[0.02] backdrop-blur-xl border border-white/10 rounded-3xl p-10 shadow-xl">
-              <div className="flex items-center justify-between mb-8">
-                <div>
-                  <h3 className="text-2xl font-bold text-white mb-2">Revenue Flow</h3>
-                  <p className="text-gray-400">Weekly income generation</p>
-                </div>
-                <div className="text-green-400 text-sm font-medium">+31.2% this week</div>
-              </div>
-              <div className="h-64 flex items-end justify-between space-x-3">
-                {weeklyRevenue.map((revenue, index) => (
-                  <div key={index} className="flex-1 flex flex-col items-center group/bar">
-                    <div 
-                      className="w-full bg-gradient-to-t from-green-500 to-green-300 rounded-t-lg transition-all duration-700 hover:from-green-400 hover:to-green-200 group-hover/bar:shadow-lg group-hover/bar:shadow-green-500/50"
-                      style={{ height: `${(revenue / Math.max(...weeklyRevenue)) * 200}px` }}
-                    ></div>
-                    <div className="text-xs text-gray-400 mt-3 font-medium">
-                      {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][index]}
-                    </div>
-                    <div className="text-sm text-green-300 font-bold">${revenue}</div>
                   </div>
                 ))}
               </div>

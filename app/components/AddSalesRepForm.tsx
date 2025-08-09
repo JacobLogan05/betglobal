@@ -2,12 +2,17 @@
 
 import { useState } from 'react'
 import { PlusIcon, UserPlusIcon } from '@heroicons/react/24/outline'
+import { useSalesRep } from '@/app/contexts/SalesRepContext'
 
 export default function AddSalesRepForm() {
+  const { addSalesRep } = useSalesRep()
   const [isOpen, setIsOpen] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
+    email: '',
+    phone: '',
     role: '',
     totalSignups: '',
     bovadaSignups: '',
@@ -27,26 +32,55 @@ export default function AddSalesRepForm() {
     }))
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // TODO: Implement API call to add sales rep
-    console.log('Adding sales rep:', formData)
+    setIsSubmitting(true)
     
-    // Reset form and close
-    setFormData({
-      firstName: '',
-      lastName: '',
-      role: '',
-      totalSignups: '',
-      bovadaSignups: '',
-      chalkboardSignups: '',
-      commissionsEarned: '',
-      commissionsPaid: '',
-      commissionsDue: '',
-      status: 'Active',
-      notes: ''
-    })
-    setIsOpen(false)
+    try {
+      // Convert string values to numbers for numeric fields
+      const salesRepData = {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        phone: formData.phone,
+        role: formData.role,
+        totalSignups: parseInt(formData.totalSignups) || 0,
+        bovadaSignups: parseInt(formData.bovadaSignups) || 0,
+        chalkboardSignups: parseInt(formData.chalkboardSignups) || 0,
+        commissionsEarned: parseFloat(formData.commissionsEarned) || 0,
+        commissionsPaid: parseFloat(formData.commissionsPaid) || 0,
+        commissionsDue: parseFloat(formData.commissionsDue) || 0,
+        status: formData.status as 'Active' | 'Inactive',
+        joinDate: new Date().toISOString().split('T')[0],
+        lastActivity: new Date().toISOString().split('T')[0],
+        notes: formData.notes
+      }
+
+      await addSalesRep(salesRepData)
+      
+      // Reset form and close
+      setFormData({
+        firstName: '',
+        lastName: '',
+        email: '',
+        phone: '',
+        role: '',
+        totalSignups: '',
+        bovadaSignups: '',
+        chalkboardSignups: '',
+        commissionsEarned: '',
+        commissionsPaid: '',
+        commissionsDue: '',
+        status: 'Active',
+        notes: ''
+      })
+      setIsOpen(false)
+    } catch (error) {
+      console.error('Error adding sales rep:', error)
+      alert('Failed to add sales rep. Please try again.')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -68,7 +102,7 @@ export default function AddSalesRepForm() {
             {isOpen ? (
               <>
                 <span className="mr-2">Cancel</span>
-                <span className="text-lg">×</span>
+                <span className="text-lg font-black">×</span>
               </>
             ) : (
               <>
@@ -115,21 +149,56 @@ export default function AddSalesRepForm() {
               </div>
             </div>
 
+            {/* Contact Information */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Email *
+                </label>
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  required
+                  className="w-full px-4 py-3 bg-gray-800/50 border border-gray-600/50 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50"
+                  placeholder="Enter email address"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Phone
+                </label>
+                <input
+                  type="tel"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 bg-gray-800/50 border border-gray-600/50 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50"
+                  placeholder="Enter phone number"
+                />
+              </div>
+            </div>
+
             {/* Role and Status */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">
                   Role *
                 </label>
-                <input
-                  type="text"
+                <select
                   name="role"
                   value={formData.role}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-4 py-3 bg-gray-800/50 border border-gray-600/50 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50"
-                  placeholder="e.g., Sales Rep, Senior Sales Rep"
-                />
+                  className="w-full px-4 py-3 bg-gray-800/50 border border-gray-600/50 rounded-lg text-white focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50"
+                >
+                  <option value="">Select a role</option>
+                  <option value="sales_rep">Sales Rep</option>
+                  <option value="admin">Admin</option>
+                  <option value="finance">Finance</option>
+                  <option value="manager">Manager</option>
+                </select>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -143,7 +212,6 @@ export default function AddSalesRepForm() {
                 >
                   <option value="Active">Active</option>
                   <option value="Inactive">Inactive</option>
-                  <option value="On Leave">On Leave</option>
                 </select>
               </div>
             </div>
@@ -269,16 +337,18 @@ export default function AddSalesRepForm() {
               <button
                 type="button"
                 onClick={() => setIsOpen(false)}
-                className="px-6 py-3 bg-gray-600/20 text-gray-300 border border-gray-600/30 rounded-lg hover:bg-gray-600/30 transition-colors"
+                disabled={isSubmitting}
+                className="px-6 py-3 bg-gray-600/20 text-gray-300 border border-gray-600/30 rounded-lg hover:bg-gray-600/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="flex items-center px-6 py-3 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 text-cyan-300 border border-cyan-500/30 rounded-lg hover:from-cyan-500/30 hover:to-blue-500/30 transition-all duration-200"
+                disabled={isSubmitting}
+                className="flex items-center px-6 py-3 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 text-cyan-300 border border-cyan-500/30 rounded-lg hover:from-cyan-500/30 hover:to-blue-500/30 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <UserPlusIcon className="h-5 w-5 mr-2" />
-                Add Sales Rep
+                {isSubmitting ? 'Adding...' : 'Add Sales Rep'}
               </button>
             </div>
           </form>

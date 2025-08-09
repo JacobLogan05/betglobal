@@ -150,7 +150,7 @@ export default function ContestManager() {
       <div className="bg-black/40 backdrop-blur-sm border border-purple-500/30 rounded-xl p-8 shadow-2xl shadow-purple-500/10">
         <div className="flex items-center gap-3 mb-6">
           <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold">🏆</span>
+            <span className="text-white font-bold text-lg">WINNER</span>
           </div>
           <h2 className="text-2xl font-bold text-transparent bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text">
             Create New Contest
@@ -277,7 +277,7 @@ export default function ContestManager() {
                 <div>
                   <div className="flex items-center gap-3 mb-2">
                     <div className="w-8 h-8 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-lg flex items-center justify-center">
-                      <span className="text-white font-bold">🏆</span>
+                      <span className="text-white font-bold text-lg">WINNER</span>
                     </div>
                     <h3 className="text-2xl font-bold text-transparent bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text">
                       {contest.name}
@@ -363,7 +363,7 @@ export default function ContestManager() {
       {contests.length === 0 && (
         <div className="bg-black/40 backdrop-blur-sm border border-gray-500/30 rounded-xl p-12 text-center">
           <div className="w-16 h-16 bg-gradient-to-r from-gray-600 to-gray-500 rounded-lg flex items-center justify-center mx-auto mb-4">
-            <span className="text-white text-2xl">🏆</span>
+            <span className="text-white text-2xl font-black">TROPHY</span>
           </div>
           <p className="text-gray-400 font-mono">No contests created yet. Create your first contest above!</p>
         </div>

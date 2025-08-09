@@ -19,7 +19,23 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Admin access required' }, { status: 403 })
     }
 
-    const { email, firstName, lastName } = await request.json()
+    const { 
+      email, 
+      firstName, 
+      lastName, 
+      phone, 
+      role = 'sales_rep',
+      totalSignups = 0,
+      bovadaSignups = 0,
+      chalkboardSignups = 0,
+      commissionsEarned = 0,
+      commissionsPaid = 0,
+      commissionsDue = 0,
+      status = 'Active',
+      notes,
+      joinDate,
+      lastActivity
+    } = await request.json()
 
     if (!email || !firstName || !lastName) {
       return NextResponse.json({ error: 'All fields are required' }, { status: 400 })
@@ -38,7 +54,18 @@ export async function POST(request: NextRequest) {
       email,
       firstName,
       lastName,
-      role: 'sales_rep',
+      phone,
+      role: role as 'sales_rep' | 'admin' | 'finance' | 'manager',
+      totalSignups,
+      bovadaSignups,
+      chalkboardSignups,
+      commissionsEarned: commissionsEarned.toString(),
+      commissionsPaid: commissionsPaid.toString(),
+      commissionsDue: commissionsDue.toString(),
+      status,
+      notes,
+      hireDate: joinDate ? new Date(joinDate) : new Date(),
+      lastActivity: lastActivity ? new Date(lastActivity) : new Date(),
       isActive: true
     }).returning()
 

@@ -8,16 +8,26 @@ export const signupStatusEnum = pgEnum('signup_status', ['pending', 'qualified',
 export const bonusTypeEnum = pgEnum('bonus_type', ['milestone', 'contest', 'first_signup']);
 export const payoutStatusEnum = pgEnum('payout_status', ['pending', 'paid', 'processing']);
 
-// Users table
+// Users table (Sales Reps)
 export const users = pgTable('users', {
   id: uuid('id').primaryKey().defaultRandom(),
-  clerkId: text('clerk_id').unique().notNull(),
+  clerkId: text('clerk_id').unique(),
   email: text('email').unique().notNull(),
   firstName: text('first_name').notNull(),
   lastName: text('last_name').notNull(),
+  phone: text('phone'),
   role: userRoleEnum('role').notNull().default('sales_rep'),
+  totalSignups: integer('total_signups').notNull().default(0),
+  bovadaSignups: integer('bovada_signups').notNull().default(0),
+  chalkboardSignups: integer('chalkboard_signups').notNull().default(0),
+  commissionsEarned: decimal('commissions_earned', { precision: 10, scale: 2 }).notNull().default('0'),
+  commissionsPaid: decimal('commissions_paid', { precision: 10, scale: 2 }).notNull().default('0'),
+  commissionsDue: decimal('commissions_due', { precision: 10, scale: 2 }).notNull().default('0'),
+  status: text('status').notNull().default('Active'),
   isActive: boolean('is_active').notNull().default(true),
   hireDate: timestamp('hire_date').defaultNow(),
+  lastActivity: timestamp('last_activity').defaultNow(),
+  notes: text('notes'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });

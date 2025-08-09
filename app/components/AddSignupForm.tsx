@@ -47,7 +47,7 @@ export default function AddSignupForm({ reps }: AddSignupFormProps) {
       const result = await response.json()
 
       if (response.ok) {
-        setMessage('✅ Signup added successfully!')
+        setMessage('Signup added successfully!')
         setFormData({
           repId: '',
           platform: 'bovada',
@@ -58,10 +58,10 @@ export default function AddSignupForm({ reps }: AddSignupFormProps) {
         })
         router.refresh()
       } else {
-        setMessage(`❌ Error: ${result.error}`)
+        setMessage(`Error: ${result.error}`)
       }
     } catch (error) {
-      setMessage('❌ Failed to add signup')
+      setMessage('Failed to add signup')
     } finally {
       setIsLoading(false)
     }

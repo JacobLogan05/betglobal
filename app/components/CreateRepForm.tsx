@@ -30,14 +30,14 @@ export default function CreateRepForm() {
       const result = await response.json()
 
       if (response.ok) {
-        setMessage('✅ Sales rep created successfully!')
+        setMessage('Sales rep created successfully!')
         setFormData({ email: '', firstName: '', lastName: '' })
         router.refresh()
       } else {
-        setMessage(`❌ Error: ${result.error}`)
-      }
-    } catch (error) {
-      setMessage('❌ Failed to create sales rep')
+          setMessage(`Error: ${result.error}`)
+        }
+      } catch (error) {
+        setMessage('Failed to create sales rep')
     } finally {
       setIsLoading(false)
     }

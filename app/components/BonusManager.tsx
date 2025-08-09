@@ -93,16 +93,16 @@ export default function BonusManager({ reps }: BonusManagerProps) {
       const result = await response.json()
 
       if (response.ok) {
-        setMessage(`✅ Milestone bonus awarded: $${milestone.amount}!`)
+        setMessage(`Milestone bonus awarded: $${milestone.amount}!`)
         setSelectedRep('')
         setMilestoneAmount('')
         fetchRecentBonuses()
         router.refresh()
       } else {
-        setMessage(`❌ Error: ${result.error}`)
+        setMessage(`Error: ${result.error}`)
       }
     } catch (error) {
-      setMessage('❌ Failed to award bonus')
+      setMessage('Failed to award bonus')
     } finally {
       setIsLoading(false)
     }
@@ -130,17 +130,17 @@ export default function BonusManager({ reps }: BonusManagerProps) {
       const result = await response.json()
 
       if (response.ok) {
-        setMessage(`✅ ${bonusType} bonus awarded: $${customAmount}!`)
+        setMessage(`${bonusType} bonus awarded: $${customAmount}!`)
         setSelectedRep('')
         setCustomAmount('')
         setDescription('')
         fetchRecentBonuses()
         router.refresh()
       } else {
-        setMessage(`❌ Error: ${result.error}`)
+        setMessage(`Error: ${result.error}`)
       }
     } catch (error) {
-      setMessage('❌ Failed to award bonus')
+      setMessage('Failed to award bonus')
     } finally {
       setIsLoading(false)
     }
@@ -325,7 +325,7 @@ export default function BonusManager({ reps }: BonusManagerProps) {
             </div>
           ) : (
             <div className="text-center py-8">
-              <div className="text-cyan-300/40 text-4xl mb-4">🎁</div>
+              <div className="text-cyan-300/40 text-4xl mb-4 font-black">BONUS</div>
               <p className="text-cyan-300/60 font-mono">[ NO BONUSES AWARDED YET ]</p>
             </div>
           )}

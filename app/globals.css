@@ -196,7 +196,7 @@
   }
 }
 
-/* Cyberpunk Animations */
+/* Quantum Scanning Animations */
 @keyframes scan {
   0% {
     top: -2px;
@@ -211,6 +211,24 @@
   }
 }
 
+@keyframes scan-vertical {
+  0% {
+    left: -2px;
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+  100% {
+    left: 100vw;
+    opacity: 0;
+  }
+}
+
 .animate-scan {
-  animation: scan 3s linear infinite;
+  animation: scan 4s linear infinite;
+}
+
+.animate-scan-vertical {
+  animation: scan-vertical 5s linear infinite;
 }
